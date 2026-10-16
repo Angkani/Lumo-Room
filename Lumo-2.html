@@ -1,0 +1,909 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lumo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Albert+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: one dark studio-lit hero, then alternating blackish and cream-white bands.
+   Views: Home, Rental, Catalog, and a quiet Team page reached from the footer. */
+:root{
+  --ink:#17150F;      /* blackish */
+  --ink-2:#201D16;
+  --ink-3:#2B271E;
+  --paper:#F6F4EE;    /* cream-white */
+  --paper-2:#ECE8DC;
+  --gold:#B8955A;     /* goldish */
+  --gold-hi:#D3B676;
+  --gold-deep:#80622F;
+  --line-d:rgba(211,182,118,.22);
+  --line-l:rgba(23,21,15,.15);
+  --mute-d:#A9A190;
+  --mute-l:#625C4D;
+  --display:'Bodoni Moda','Didot','Times New Roman',serif;
+  --body:'Albert Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--ink)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.band{width:100%}
+.band.dark{background:var(--ink);color:var(--paper)}
+.band.dark2{background:var(--ink-2);color:var(--paper)}
+.band.light{background:var(--paper);color:var(--ink)}
+.band .wrap{padding-block:clamp(64px,9vw,112px)}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-hi)}
+.light .eyebrow{color:var(--gold-deep)}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.05;margin:0;text-wrap:balance}
+h2{font-size:clamp(34px,5vw,58px);letter-spacing:-.01em}
+h3{font-size:26px}
+h2 em,h1 em{font-style:italic;color:var(--gold-hi)}
+.light h2 em{color:var(--gold-deep)}
+p{margin:0}
+.lead{font-size:18px;color:var(--mute-d);max-width:56ch}
+.light .lead{color:var(--mute-l)}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(23,21,15,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-d)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:38px;height:38px;flex:none}
+.brand img{height:38px;width:auto;max-width:120px;object-fit:contain;display:block}
+.brand b{font-family:var(--display);font-weight:500;font-size:24px;letter-spacing:.32em;padding-left:.32em}
+.links{display:flex;align-items:center;gap:clamp(16px,3vw,36px)}
+.links a.nl{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute-d);padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.links a.nl:hover{color:var(--paper)}
+.links a.nl[aria-current="page"]{color:var(--gold-hi);border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:14px 22px;border:1px solid var(--gold);background:var(--gold);color:var(--ink);transition:background .2s,color .2s,border-color .2s}
+.btn:hover{background:var(--gold-hi);border-color:var(--gold-hi)}
+.btn.ghost{background:transparent;color:var(--paper)}
+.btn.ghost:hover{background:rgba(211,182,118,.12);border-color:var(--gold-hi)}
+.light .btn.ghost{color:var(--ink);border-color:var(--ink)}
+.light .btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.btn.sm{padding:10px 16px}
+.nav .btn{padding:10px 18px}
+.tlink{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-hi);border-bottom:1px solid var(--line-d);padding-bottom:3px;background:none;border-top:0;border-left:0;border-right:0}
+.tlink:hover{border-color:var(--gold-hi)}
+
+/* live strip */
+.live{background:var(--ink-2);border-bottom:1px solid var(--line-d)}
+.live .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;overflow:hidden}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gold-hi);flex:none;box-shadow:0 0 0 0 rgba(211,182,118,.6);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(211,182,118,.55)}70%{box-shadow:0 0 0 9px rgba(211,182,118,0)}100%{box-shadow:0 0 0 0 rgba(211,182,118,0)}}
+.live .mono{color:var(--mute-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.live .mono b{color:var(--gold-hi);font-weight:500}
+.live .tail{margin-left:auto;color:var(--mute-d)}
+
+/* hero */
+.hero{position:relative;isolation:isolate;overflow:hidden;background:
+  radial-gradient(ellipse 55% 75% at 78% -5%,rgba(211,182,118,.34),transparent 62%),
+  radial-gradient(ellipse 45% 55% at 8% 105%,rgba(211,182,118,.16),transparent 60%),
+  linear-gradient(180deg,#1f1b13,#110f0b)}
+.herobg{position:absolute;inset:0;z-index:-2}
+.herobg img,.herobg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(17,15,11,.82) 0%,rgba(17,15,11,.35) 60%,rgba(17,15,11,.15) 100%),linear-gradient(0deg,rgba(17,15,11,.75),transparent 40%)}
+.hero .wrap{padding-block:clamp(72px,12vw,150px) clamp(40px,6vw,72px);position:relative}
+.hero h1{font-size:clamp(96px,24vw,300px);font-weight:400;letter-spacing:-.03em;line-height:.86;margin:22px 0 26px -.04em}
+.hero .lead{color:#D8D2C2;font-size:clamp(17px,2vw,21px)}
+.hero .cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:34px}
+.rig{position:absolute;right:max(20px,4vw);bottom:0;width:min(34vw,380px);opacity:.5;z-index:-1}
+.photo-note{position:absolute;right:max(20px,env(safe-area-inset-right,0px));top:16px;color:rgba(211,182,118,.6);border:1px dashed rgba(211,182,118,.35);padding:5px 10px}
+.slate{display:flex;gap:clamp(16px,4vw,48px);flex-wrap:wrap;margin-top:clamp(48px,7vw,84px);padding-top:18px;border-top:1px solid var(--line-d);color:var(--mute-d)}
+.slate span b{color:var(--paper);font-weight:500}
+
+/* services */
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:56px;border-top:1px solid var(--line-l)}
+.cols3>div{padding:30px 28px 8px 0;display:flex;flex-direction:column;gap:14px;min-width:0}
+.cols3>div+div{padding-left:28px;border-left:1px solid var(--line-l)}
+.cols3 p{color:var(--mute-l)}
+.arrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);border:0;border-bottom:1px solid var(--gold-deep);background:none;align-self:flex-start;padding:0 0 3px;margin-top:6px}
+.head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+
+/* project cards + slideshow thumbnails */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.card{display:flex;flex-direction:column;gap:14px;text-align:left;background:none;border:0;padding:0;color:inherit;min-width:0}
+.poster{position:relative;aspect-ratio:4/5;max-width:100%;overflow:hidden;background:radial-gradient(circle at var(--x,30%) var(--y,25%),rgba(211,182,118,.5),transparent 58%),linear-gradient(165deg,#2e2920,#15130e);border:1px solid var(--line-d);transition:border-color .25s}
+.poster::before{content:"";position:absolute;inset:14px;border:1px solid rgba(211,182,118,.28);pointer-events:none;z-index:2}
+.poster span{position:absolute;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,244,238,.8)}
+.poster .tl{left:26px;top:24px}.poster .br{right:26px;bottom:24px}
+.poster .mid{left:26px;bottom:24px;color:var(--gold-hi)}
+.poster.sl img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity 1.1s ease,transform 6s ease-out;z-index:0}
+.poster.sl img.on{opacity:1;transform:scale(1)}
+.poster.sl::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(15,13,9,.72),transparent 48%),linear-gradient(180deg,rgba(15,13,9,.35),transparent 28%);pointer-events:none}
+.card:hover .poster{border-color:var(--gold-hi)}
+.card h3{font-size:24px}
+.meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--mute-d)}
+.card .more{color:var(--gold-hi);font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.tag{border:1px solid var(--line-d);padding:2px 8px;color:var(--gold-hi)}
+
+/* process */
+.steps{list-style:none;margin:56px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+.steps li{padding:22px 18px 0 0;border-top:1px solid var(--ink);position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.steps li::before{content:"";position:absolute;top:-4px;left:0;width:7px;height:7px;background:var(--gold-deep);border-radius:50%}
+.steps b{font-family:var(--display);font-weight:400;font-size:24px}
+.steps p{color:var(--mute-l);font-size:15px}
+.quiet{margin-top:40px;color:var(--mute-l);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.quiet button{color:var(--gold-deep);border-bottom-color:var(--line-l)}
+
+/* rental teaser + chips */
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(32px,6vw,80px);align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 14px;border:1px solid var(--line-d);background:transparent;color:var(--mute-d);transition:all .2s}
+.chip:hover{color:var(--paper);border-color:var(--gold)}
+.chip[aria-pressed="true"]{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+
+/* page headers */
+.phead .wrap{padding-block:clamp(56px,8vw,104px) clamp(36px,5vw,56px)}
+.phead h1{font-size:clamp(56px,10vw,128px);letter-spacing:-.02em;margin:16px 0 20px}
+
+/* rental */
+.rental{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
+.gear{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.item{border:1px solid var(--line-d);padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--ink-2);min-width:0}
+.item .top{display:flex;gap:16px;align-items:flex-start}
+.item .txt{display:flex;flex-direction:column;gap:6px;min-width:0}
+.item .mono{color:var(--gold-hi)}
+.item h3{font-size:22px}
+.item p{color:var(--mute-d);font-size:15px}
+.gthumb{width:68px;height:68px;flex:none;border:1px solid var(--line-d);background:var(--ink-3);display:grid;place-items:center;overflow:hidden}
+.gthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.gthumb svg{width:30px;height:30px;stroke:var(--gold-hi);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.item .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:12px;border-top:1px solid var(--line-d);flex-wrap:wrap}
+.item .foot .mono{color:var(--mute-d)}
+.item.on{border-color:var(--gold)}
+.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);border:1px solid var(--gold);padding:24px;background:var(--ink-2);display:flex;flex-direction:column;gap:14px}
+.panel ul{list-style:none;margin:0;padding:0}
+.panel li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-d);font-size:15px}
+.panel li button{background:none;border:0;color:var(--mute-d);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0}
+.panel li button:hover{color:var(--gold-hi)}
+.empty{color:var(--mute-d);font-size:15px}
+.note{font-size:13px;color:var(--mute-d)}
+
+/* team (quiet page) */
+.team{overflow:hidden}
+.tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,4vw,56px);padding-top:clamp(70px,9vw,120px)}
+.person{display:flex;flex-direction:column;gap:20px;min-width:0}
+.person:nth-child(2){margin-top:clamp(0px,5vw,64px)}
+.pframe{position:relative;aspect-ratio:4/5;max-width:100%}
+.pbg{position:absolute;inset:0;overflow:hidden;border:1px solid var(--line-d)}
+.pbg.v0{background:radial-gradient(circle at 70% 18%,rgba(246,244,238,.28),transparent 55%),linear-gradient(160deg,var(--gold-hi),var(--gold-deep))}
+.pbg.v1{background:radial-gradient(circle at 30% 20%,rgba(211,182,118,.4),transparent 58%),linear-gradient(165deg,#2e2920,#15130e)}
+.pbg.v2{background:radial-gradient(circle at 75% 15%,rgba(211,182,118,.35),transparent 55%),linear-gradient(160deg,var(--paper),var(--paper-2))}
+.pbg img.back{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;mix-blend-mode:luminosity}
+.pname{position:absolute;left:5%;top:7%;font-family:var(--display);font-size:clamp(64px,9vw,116px);line-height:.9;color:transparent;-webkit-text-stroke:1px rgba(246,244,238,.5);white-space:nowrap;letter-spacing:-.02em}
+.v2 .pname{-webkit-text-stroke-color:rgba(23,21,15,.35)}
+.fig{position:absolute;left:50%;bottom:-7%;height:128%;width:auto;max-width:none;transform:translateX(-50%) rotate(var(--rot,-5deg));transform-origin:50% 100%;filter:drop-shadow(0 20px 26px rgba(0,0,0,.45));pointer-events:none}
+svg.fig{width:90%;height:auto;aspect-ratio:300/520;fill:rgba(23,21,15,.38);filter:none}
+.v2 svg.fig{fill:rgba(23,21,15,.2)}
+.pcap h3{font-size:28px}
+.pcap .mono{color:var(--gold-hi);display:block;margin:6px 0 10px}
+.pcap p{color:var(--mute-d);font-size:15px;max-width:34ch}
+
+/* modals */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(10,9,6,.78);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.mcard{background:var(--paper);color:var(--ink);max-width:900px;width:100%;max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);position:relative}
+.mcard .poster{aspect-ratio:auto;min-height:100%;border:0}
+.mmedia{position:relative;min-height:340px;background:var(--ink)}
+.mmedia img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mnav{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(0deg,rgba(15,13,9,.8),transparent);color:var(--paper)}
+.mnav button{width:38px;height:38px;border:1px solid rgba(246,244,238,.5);background:rgba(15,13,9,.5);color:var(--paper);font-size:16px}
+.mnav button:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.mbody{padding:clamp(24px,4vw,44px);display:flex;flex-direction:column;gap:16px;min-width:0}
+.mbody p{color:var(--mute-l)}
+.mbody .eyebrow{color:var(--gold-deep)}
+.mbody .tag{color:var(--gold-deep);border-color:var(--line-l)}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border:1px solid var(--line-l);background:var(--paper);color:var(--ink);font-size:18px;line-height:1;z-index:5}
+.x:hover{background:var(--ink);color:var(--paper)}
+
+/* inquiry */
+.icard{background:var(--ink-2);border:1px solid var(--gold);color:var(--paper);color-scheme:dark;max-width:960px;width:100%;max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);position:relative}
+.icard .x{background:var(--ink-2);border-color:var(--line-d);color:var(--paper)}
+.icard .x:hover{background:var(--gold);color:var(--ink)}
+.iform{padding:clamp(24px,4vw,44px);display:flex;flex-direction:column;gap:18px;min-width:0}
+.iform h2{font-size:clamp(28px,4vw,40px)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-d)}
+.seg button{padding:13px 10px;background:transparent;border:0;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-d)}
+.seg button+button{border-left:1px solid var(--line-d)}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--ink)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-hi)}
+.fld input,.fld select,.fld textarea{width:100%;font:inherit;font-size:16px;color:var(--paper);background:var(--ink);border:1px solid var(--line-d);padding:12px 13px;border-radius:0}
+.fld textarea{min-height:84px;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:2px solid var(--gold-hi);outline-offset:1px;border-color:var(--gold)}
+.ilist{display:flex;flex-wrap:wrap;gap:8px}
+.ilist span{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-d);padding:6px 10px;font-size:14px}
+.ilist button{background:none;border:0;color:var(--gold-hi);font-size:16px;line-height:1;padding:0}
+.err{color:#E6A38F;font-size:14px;min-height:0}
+.ok{border:1px solid var(--gold);padding:18px;display:flex;flex-direction:column;gap:12px}
+.ok textarea{width:100%;min-height:150px;font:inherit;font-size:14px;color:var(--paper);background:var(--ink);border:1px solid var(--line-d);padding:12px}
+.itake{padding:clamp(24px,4vw,44px);background:var(--ink);border-left:1px solid var(--line-d);display:flex;flex-direction:column;gap:16px;min-width:0}
+.itake h3{font-size:28px}
+.itake p{color:var(--mute-d);font-size:15px}
+.phone{font-family:var(--mono);font-size:18px;letter-spacing:.06em;color:var(--paper);word-break:break-all;user-select:all}
+.acts{display:flex;flex-wrap:wrap;gap:10px}
+
+/* toast */
+.toast{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:90;max-width:min(380px,calc(100% - 32px));background:var(--ink-2);border:1px solid var(--gold);padding:14px 44px 14px 16px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.toast p{font-size:14px;color:var(--paper);line-height:1.45}
+.toast p span{display:block;color:var(--gold-hi);font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.toast .dot{margin-top:6px}
+.toast button{position:absolute;right:8px;top:6px;background:none;border:0;color:var(--mute-d);font-size:20px;width:30px;height:30px}
+
+/* footer */
+footer{background:var(--ink-2);border-top:1px solid var(--gold);color:var(--paper)}
+footer .wrap{padding-block:clamp(56px,7vw,88px) 28px}
+.fgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.3fr;gap:clamp(24px,4vw,56px)}
+.fgrid h4{margin:0 0 16px;font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-hi)}
+.fgrid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.fgrid a,.fgrid li{color:var(--mute-d);font-size:15px;transition:color .2s;overflow-wrap:anywhere}
+.fgrid a:hover{color:var(--paper)}
+.fbrand b{display:block;font-family:var(--display);font-weight:500;font-size:44px;letter-spacing:.3em;line-height:1;margin-bottom:14px}
+.fbrand p{color:var(--mute-d);font-size:15px;max-width:34ch}
+.fbase{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:56px;padding-top:22px;border-top:1px solid var(--line-d);color:var(--mute-d)}
+.fbase a:hover{color:var(--gold-hi)}
+.fbase .sep{opacity:.4;padding:0 8px}
+
+@media (max-width:900px){
+  .cols3,.steps{grid-template-columns:1fr}
+  .cols3>div+div{padding-left:0;border-left:0;border-top:1px solid var(--line-l);margin-top:22px}
+  .steps li{padding-bottom:22px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .split,.rental{grid-template-columns:1fr}
+  .panel{position:static}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .mcard,.icard{grid-template-columns:1fr}
+  .mcard .poster{aspect-ratio:16/9;min-height:0}
+  .mmedia{min-height:0;aspect-ratio:4/3}
+  .itake{border-left:0;border-top:1px solid var(--line-d)}
+  .rig{display:none}
+  .tgrid{grid-template-columns:1fr;max-width:420px;margin:0 auto}
+  .person:nth-child(2){margin-top:0}
+}
+@media (max-width:560px){
+  .grid,.gear,.fgrid,.row2{grid-template-columns:1fr}
+  .links{gap:14px}
+  .nav .btn{display:none}
+  .live .tail{display:none}
+  .brand b{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .dot{animation:none}
+  *{transition:none!important}
+}
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#home" data-nav="home" aria-label="Lumo home">
+      <svg id="brandSvg" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="18.5" stroke="#D3B676" stroke-width="1.2"/><path d="M14 9v18h13" stroke="#D3B676" stroke-width="2.2" stroke-linecap="square"/><circle cx="27" cy="13" r="2" fill="#D3B676"/></svg>
+      <img id="brandImg" alt="" hidden>
+      <b>LUMO</b>
+    </a>
+    <nav class="links" aria-label="Main">
+      <a class="nl" href="#home" data-nav="home">Home</a>
+      <a class="nl" href="#rental" data-nav="rental">Rental</a>
+      <a class="nl" href="#catalog" data-nav="catalog">Catalog</a>
+      <button class="btn" type="button" id="inquire">Inquire</button>
+    </nav>
+  </div>
+</header>
+
+<div class="live" role="status" aria-live="polite">
+  <div class="wrap">
+    <span class="dot"></span>
+    <span class="mono" id="liveText"></span>
+    <span class="mono tail">Studio active</span>
+  </div>
+</div>
+
+<main>
+<!-- ============ HOME ============ -->
+<section data-view="home">
+  <div class="band hero">
+    <div class="herobg"><img id="heroImg" alt="" hidden><video id="heroVid" muted loop playsinline preload="auto" hidden></video></div>
+    <span class="mono photo-note" id="photoNote">Placeholder · studio photo</span>
+    <svg class="rig" viewBox="0 0 320 360" fill="none" aria-hidden="true">
+      <g stroke="#D3B676" stroke-width="1.2">
+        <rect x="40" y="20" width="110" height="80" transform="rotate(-8 95 60)"/><rect x="52" y="32" width="86" height="56" transform="rotate(-8 95 60)" opacity=".5"/>
+        <path d="M95 100v250M95 350l-40 10M95 350l40 10M95 350v10"/>
+        <rect x="190" y="70" width="90" height="64" transform="rotate(6 235 102)"/><rect x="200" y="80" width="70" height="44" transform="rotate(6 235 102)" opacity=".5"/>
+        <path d="M235 134v216M235 350l-34 10M235 350l34 10M235 350v10"/>
+      </g>
+    </svg>
+    <div class="wrap">
+      <div class="eyebrow">Lumo Room &nbsp;·&nbsp; Indoor studio &amp; production</div>
+      <h1>Lumo</h1>
+      <p class="lead">High-end production, made in our own studio. Professional equipment for rent when the set is yours.</p>
+      <div class="cta">
+        <a class="btn" href="#catalog" data-nav="catalog">View catalog &rarr;</a>
+        <button class="btn ghost" type="button" data-inq="shoot">Book a shoot</button>
+        <a class="tlink" href="#rental" data-nav="rental">Rent equipment</a>
+      </div>
+      <div class="slate mono"><span>Scene <b>01</b></span><span>Take <b>03</b></span><span>Rate <b>24 fps</b></span><span>Format <b>4K</b></span></div>
+    </div>
+  </div>
+
+  <div class="band light">
+    <div class="wrap">
+      <div class="eyebrow">What we do</div>
+      <h2 style="margin-top:14px;max-width:16ch">One room, <em>every stage</em> of the shoot.</h2>
+      <div class="cols3">
+        <div><h3>Production</h3><p>Film, photo and highlight edits planned, shot and finished by one team, so the look stays consistent from first frame to final export.</p><a class="arrow" href="#catalog" data-nav="catalog">See the work</a></div>
+        <div><h3>The studio</h3><p>An indoor studio built for controlled light and sound. Bring a concept, a product or a crew and shoot without worrying about weather.</p><button class="arrow" type="button" data-inq="shoot">Book a visit</button></div>
+        <div><h3>Equipment rental</h3><p>Cameras, lenses, lighting, audio and support gear. Pick what you need, send the list, and we reply with availability and rates.</p><a class="arrow" href="#rental" data-nav="rental">Browse the kit</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band dark2">
+    <div class="wrap">
+      <div class="head-row">
+        <div><div class="eyebrow" style="display:flex;align-items:center;gap:10px"><span class="dot"></span>Recently delivered</div><h2 style="margin-top:14px">Fresh off the <em>timeline</em></h2></div>
+        <a class="btn ghost sm" href="#catalog" data-nav="catalog">All projects</a>
+      </div>
+      <div class="grid" id="recent" style="margin-top:48px"></div>
+    </div>
+  </div>
+
+  <div class="band light">
+    <div class="wrap">
+      <div class="eyebrow">How a project runs</div>
+      <h2 style="margin-top:14px;max-width:18ch">From first message to <em>final delivery</em></h2>
+      <ol class="steps">
+        <li><b>Brief</b><p>We learn the goal, the audience and the deadline.</p></li>
+        <li><b>Pre-production</b><p>Shot list, schedule, crew and gear locked in.</p></li>
+        <li><b>Shoot</b><p>Studio or on location, with lighting built for the frame.</p></li>
+        <li><b>Post</b><p>Edit, colour and sound brought to finish.</p></li>
+        <li><b>Delivery</b><p>A private gallery with every file ready to download.</p></li>
+      </ol>
+      <p class="quiet mono">Curious who is behind the camera? <button class="tlink" type="button" data-nav="team">Meet the three of us</button></p>
+    </div>
+  </div>
+
+  <div class="band dark">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <div class="eyebrow">Rental</div>
+          <h2 style="margin:14px 0 20px">Production gear, <em>ready to book</em></h2>
+          <p class="lead">Rent the same class of equipment we use on our own sets. Build a list on the rental page and send it to us in one message.</p>
+          <div style="margin-top:30px"><a class="btn" href="#rental" data-nav="rental">Open rental &rarr;</a></div>
+        </div>
+        <div class="chips" aria-label="Rental categories">
+          <a class="chip" href="#rental" data-nav="rental" data-cat="Cameras">Cameras</a>
+          <a class="chip" href="#rental" data-nav="rental" data-cat="Lenses">Lenses</a>
+          <a class="chip" href="#rental" data-nav="rental" data-cat="Lighting">Lighting</a>
+          <a class="chip" href="#rental" data-nav="rental" data-cat="Audio">Audio</a>
+          <a class="chip" href="#rental" data-nav="rental" data-cat="Support">Support &amp; grip</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RENTAL ============ -->
+<section data-view="rental" hidden>
+  <div class="band dark phead">
+    <div class="wrap">
+      <div class="eyebrow">Lumo Room &nbsp;·&nbsp; Rental</div>
+      <h1>Equipment <em>rental</em></h1>
+      <p class="lead">Select what you need for the shoot. Your list builds on the right, ready to send with your dates.</p>
+    </div>
+  </div>
+  <div class="band dark2">
+    <div class="wrap">
+      <div class="chips" id="gearFilters" role="group" aria-label="Filter equipment"></div>
+      <div class="rental">
+        <div class="gear" id="gear"></div>
+        <aside class="panel" aria-label="Your rental list">
+          <div class="eyebrow">Your list</div>
+          <div id="listBody"></div>
+          <button class="btn" id="sendList" type="button">Send rental inquiry</button>
+          <p class="note">You choose the dates and purpose next. Rates and availability are confirmed per booking.</p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CATALOG ============ -->
+<section data-view="catalog" hidden>
+  <div class="band dark phead">
+    <div class="wrap">
+      <div class="eyebrow">Lumo Room &nbsp;·&nbsp; Catalog</div>
+      <h1>Recent <em>work</em></h1>
+      <p class="lead">A selection of our latest productions. Open any project for the highlights and the full gallery.</p>
+    </div>
+  </div>
+  <div class="band dark2">
+    <div class="wrap">
+      <div class="chips" id="projFilters" role="group" aria-label="Filter projects"></div>
+      <div class="grid" id="projects" style="margin-top:36px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM (linked quietly from the footer) ============ -->
+<section data-view="team" hidden>
+  <div class="band dark team">
+    <div class="wrap">
+      <div class="eyebrow">Behind the lens</div>
+      <h2 style="margin-top:14px;max-width:14ch">Three people, <em>one room.</em></h2>
+      <p class="lead" style="margin-top:18px">The faces you will meet on set, in the edit bay and at the studio door.</p>
+      <div class="tgrid" id="teamGrid"></div>
+      <p class="quiet mono" style="margin-top:72px"><button class="tlink" type="button" data-nav="home">&larr; Back home</button></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer id="contact">
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fbrand"><b>LUMO</b><p>Lumo Room. High-end production and professional equipment rental, from our indoor studio.</p></div>
+      <div><h4>Navigate</h4><ul>
+        <li><a href="#home" data-nav="home">Home</a></li>
+        <li><a href="#catalog" data-nav="catalog">Catalog</a></li>
+        <li><a href="#rental" data-nav="rental">Rental</a></li></ul></div>
+      <div><h4>Services</h4><ul>
+        <li>Film &amp; video production</li><li>Photography</li><li>Studio hire</li><li>Equipment rental</li></ul></div>
+      <div><h4>Contact</h4><ul>
+        <li data-cfg="email"></li>
+        <li data-cfg="phone"></li>
+        <li data-cfg="address"></li>
+        <li><button class="tlink" type="button" data-inq="shoot">Send an inquiry</button></li></ul></div>
+    </div>
+    <div class="fbase mono">
+      <span>&copy; 2026 Lumo. All rights reserved.</span>
+      <span><a href="#team" data-nav="team">Behind the lens</a><span class="sep">/</span><a href="#home" data-nav="home">Back to top &uarr;</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- project detail -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <div class="mcard" id="mcard"></div>
+</div>
+
+<!-- inquiry -->
+<div class="modal" id="inq" role="dialog" aria-modal="true" aria-labelledby="iTitle" hidden>
+  <div class="icard">
+    <button class="x" type="button" id="iClose" aria-label="Close">&times;</button>
+    <div class="iform">
+      <div class="eyebrow">Inquire</div>
+      <h2 id="iTitle">Tell us what you need</h2>
+      <div class="seg" role="group" aria-label="Inquiry type">
+        <button type="button" data-mode="shoot" aria-pressed="true">Book a shoot</button>
+        <button type="button" data-mode="rental" aria-pressed="false">Rent equipment</button>
+      </div>
+      <form class="stack" id="iForm" novalidate>
+        <div class="row2">
+          <div class="fld"><label for="iName">Your name</label><input id="iName" autocomplete="name"></div>
+          <div class="fld"><label for="iEmail">Email</label><input id="iEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
+        </div>
+        <div id="fShoot" class="stack">
+          <div class="row2">
+            <div class="fld"><label for="sType">Type of shoot</label>
+              <select id="sType"><option>Debut</option><option>Birthday</option><option>Christening</option><option>Wedding</option><option>Commercial / product</option><option>Corporate</option><option>Other</option></select></div>
+            <div class="fld"><label for="sDate">Preferred date</label><input id="sDate" type="date"></div>
+          </div>
+          <div class="fld"><label for="sPlace">Where</label>
+            <select id="sPlace"><option>In our studio</option><option>On location</option><option>Not sure yet</option></select></div>
+          <div class="fld"><label for="sNotes">Details</label><textarea id="sNotes" placeholder="Tell us about the concept, the guests, the deliverables you need."></textarea></div>
+        </div>
+        <div id="fRental" class="stack" hidden>
+          <div class="row2">
+            <div class="fld"><label for="rFrom">Pickup date</label><input id="rFrom" type="date"></div>
+            <div class="fld"><label for="rTo">Return date</label><input id="rTo" type="date"></div>
+          </div>
+          <div class="fld"><label for="rPurpose">Purpose</label><input id="rPurpose" list="purposes" placeholder="What will you shoot?"><datalist id="purposes"><option value="Event coverage"><option value="Commercial shoot"><option value="Film or video project"><option value="Photo shoot"><option value="School or org project"></datalist></div>
+          <div class="fld"><label>Selected equipment</label><div class="ilist" id="iList"></div></div>
+          <div class="fld"><label for="rNotes">Notes (optional)</label><textarea id="rNotes"></textarea></div>
+        </div>
+        <p class="err" id="iErr" role="alert"></p>
+        <button class="btn" type="submit" id="iSend">Send inquiry</button>
+      </form>
+      <div class="ok" id="iDone" hidden>
+        <div class="eyebrow">Request submitted</div>
+        <p>Thank you. We will reply to the email you gave us.</p>
+        <button class="btn ghost sm" type="button" id="iDoneClose" style="align-self:flex-start">Close</button>
+      </div>
+      <div class="ok" id="iFallback" hidden>
+        <div class="eyebrow">One more step</div>
+        <p>Your email app should open with this message ready. If nothing opened, copy it and send it to <b data-cfg="emailText"></b>.</p>
+        <textarea id="iMsg" readonly></textarea>
+        <div class="acts"><button class="btn sm" type="button" id="iCopyMsg">Copy message</button><a class="btn ghost sm" id="iMail" href="#" target="_blank" rel="noopener">Open email app</a></div>
+        <p class="note" id="iCopyNote"></p>
+      </div>
+    </div>
+    <aside class="itake">
+      <div class="eyebrow">Prefer to talk?</div>
+      <h3>Call or message us</h3>
+      <p>For a quick question or to set up a meeting, reach us directly.</p>
+      <div class="phone" data-cfg="phoneText"></div>
+      <div class="acts">
+        <a class="btn sm" id="callLink" href="#" target="_blank" rel="noopener">Call</a>
+        <a class="btn ghost sm" id="viberLink" href="#" target="_blank" rel="noopener">Viber</a>
+        <button class="btn ghost sm" type="button" id="copyPhone">Copy number</button>
+      </div>
+      <p class="note" id="phoneNote"></p>
+      <p class="note">Email: <span data-cfg="emailText"></span></p>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden>
+  <span class="dot"></span>
+  <p id="toastText"></p>
+  <button type="button" id="toastX" aria-label="Dismiss">&times;</button>
+</div>
+
+<script>
+/* =====================================================================
+   LUMO SETTINGS  -  this is the only part you need to edit.
+   Photos and videos live in Google Drive. For every file:
+     1. Right-click the file in Drive > Share > General access > "Anyone with the link".
+     2. Copy link, paste it between the quotes below. Full links are fine.
+   Use FILE links (not folder links). Photos: JPG or PNG. Team photos: PNG with a transparent background.
+   ===================================================================== */
+var CONFIG = {
+  logo:      "",   // logo file (PNG with transparent background works best)
+  heroPhoto: "",   // studio photo for the home hero (also shown while the video loads)
+  heroVideo: "",   // optional short loop, MP4, about 10-15 seconds, under ~30 MB. Overrides the photo once it plays.
+
+  email:   "email@yourdomain.com",
+  phone:   "+639XXXXXXXXX",   // include country code, no spaces. Used for Call and Viber.
+  address: "Studio address line",
+
+  /* Inquiry form delivery (free, via a Google Form). Leave url empty to use the email-app fallback.
+     See the setup notes in the chat. All Google Form questions must be Short answer or Paragraph. */
+  form: {
+    url: "",   // e.g. https://docs.google.com/forms/d/e/XXXXXXXX/formResponse
+    fields: { type:"", name:"", email:"", from:"", to:"", purpose:"", items:"", details:"" }  // e.g. type:"entry.1234567890"
+  }
+};
+
+/* Projects: newest first. photos = Drive links (3 to 8 is plenty). url = link to that client's full gallery site. */
+var PROJECTS = [
+  {id:"p1",title:"Christening Coverage",cat:"Christening",date:"2026-10-14",tags:["Photo","Film"],blurb:"Ceremony and family portraits, delivered as a private gallery with a short highlight film.",url:"",photos:[]},
+  {id:"p2",title:"First Birthday Coverage",cat:"Birthday",date:"2026-10-12",tags:["Photo","Video"],blurb:"Full event coverage with styled portraits and a same-week highlight edit.",url:"",photos:[]},
+  {id:"p3",title:"Debut Film & Photo",cat:"Debut",date:"2026-10-03",tags:["Film","Photo"],blurb:"An evening debut shot across studio and venue, with a cinematic highlight reel and full photo set.",url:"",photos:[]},
+  {id:"p4",title:"Product Campaign",cat:"Commercial",date:"2026-09-21",tags:["Photo","Studio"],blurb:"Controlled-light product stills shot in the studio for web and print.",url:"",photos:[]},
+  {id:"p5",title:"Corporate Profile",cat:"Corporate",date:"2026-09-09",tags:["Film","Interview"],blurb:"A short brand film with on-camera interviews and studio b-roll.",url:"",photos:[]},
+  {id:"p6",title:"Wedding Film",cat:"Wedding",date:"2026-08-30",tags:["Film","Photo"],blurb:"Full-day wedding coverage with a feature edit and a social teaser.",url:"",photos:[]}
+];
+var GALLERY_URL = "";   // fallback link used when a project has no url of its own
+
+/* Rental gear. photo = small product picture (Drive link). */
+var GEAR = [
+  {id:"g1",cat:"Cameras",name:"Cinema camera body",spec:"4K or higher, internal RAW, dual card slots",photo:""},
+  {id:"g2",cat:"Cameras",name:"Full-frame mirrorless kit",spec:"Body, two batteries, charger, cards",photo:""},
+  {id:"g3",cat:"Lenses",name:"Prime lens set",spec:"Fast primes for cinema and portrait work",photo:""},
+  {id:"g4",cat:"Lenses",name:"Zoom lens, standard range",spec:"Constant aperture, stabilized",photo:""},
+  {id:"g5",cat:"Lighting",name:"LED COB light, 300 W class",spec:"Bowens mount, daylight balanced, with stand",photo:""},
+  {id:"g6",cat:"Lighting",name:"Softbox and octa kit",spec:"Modifiers with grids, for studio and location",photo:""},
+  {id:"g7",cat:"Lighting",name:"LED tube pair",spec:"RGB tubes, battery powered, with mounts",photo:""},
+  {id:"g8",cat:"Audio",name:"Wireless lav kit",spec:"Two-channel transmitters and receiver",photo:""},
+  {id:"g9",cat:"Audio",name:"Shotgun mic and boom",spec:"Shotgun mic, boom pole, windscreen",photo:""},
+  {id:"g10",cat:"Support",name:"Fluid head tripod",spec:"Video head, carbon legs, spreader",photo:""},
+  {id:"g11",cat:"Support",name:"Gimbal stabilizer",spec:"3-axis, supports cinema-sized rigs",photo:""},
+  {id:"g12",cat:"Support",name:"C-stand and grip kit",spec:"C-stands, flags, clamps and sandbags",photo:""}
+];
+
+/* The team. png = cut-out photo with transparent background. back = optional backdrop photo behind them. rot = tilt in degrees. */
+var TEAM = [
+  {name:"Name Surname",role:"Director · Cinematography",line:"One short line about this person and what they do on set.",png:"",back:"",rot:-5},
+  {name:"Name Surname",role:"Photography · Lighting",line:"One short line about this person and what they do on set.",png:"",back:"",rot:4},
+  {name:"Name Surname",role:"Editing · Post-production",line:"One short line about this person and what they do on set.",png:"",back:"",rot:-3}
+];
+/* ===================== end of settings ===================== */
+
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function fmt(d){try{return new Date(d+"T00:00:00").toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"})}catch(e){return d}}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+
+/* ---- Google Drive media ---- */
+function dId(u){u=String(u||"");var m=u.match(/\/d\/([\w-]{10,})/)||u.match(/[?&]id=([\w-]{10,})/)||u.match(/^([\w-]{20,})$/);return m?m[1]:""}
+function imgSrcs(u,w,original){
+  var id=dId(u); if(!id) return /^(https?:|data:)/.test(u||"")?[u]:[];
+  var a=original?"https://lh3.googleusercontent.com/d/"+id:"https://lh3.googleusercontent.com/d/"+id+"=w"+(w||1600);
+  return [a,"https://drive.google.com/thumbnail?id="+id+"&sz=w"+(w||1600),"https://drive.google.com/uc?export=view&id="+id];
+}
+function videoSrcs(u){
+  var id=dId(u); if(!id) return /^https?:/.test(u||"")?[u]:[];
+  return ["https://drive.usercontent.google.com/download?id="+id+"&export=download&confirm=t","https://drive.google.com/uc?export=download&id="+id];
+}
+function loadInto(el,list,onfail,onok){
+  var i=0; if(!list.length){if(onfail)onfail();return}
+  el.referrerPolicy="no-referrer";
+  el.onerror=function(){i++;if(i<list.length){el.src=list[i]}else{el.onerror=null;if(onfail)onfail()}};
+  el.onload=function(){if(onok)onok()};
+  el.src=list[0];
+}
+
+/* ---- brand, hero media, contact ---- */
+(function(){
+  if(CONFIG.logo){var b=$("#brandImg");loadInto(b,imgSrcs(CONFIG.logo,400,true),null,function(){b.hidden=false;$("#brandSvg").hidden=true})}
+  var hasMedia=false;
+  if(CONFIG.heroPhoto){var h=$("#heroImg");hasMedia=true;loadInto(h,imgSrcs(CONFIG.heroPhoto,2000),null,function(){h.hidden=false})}
+  if(CONFIG.heroVideo){
+    var v=$("#heroVid"),vs=videoSrcs(CONFIG.heroVideo),k=0;hasMedia=true;
+    v.muted=true;
+    v.addEventListener("playing",function(){v.hidden=false});
+    v.addEventListener("error",function(){k++;if(k<vs.length){v.src=vs[k];v.load();var p=v.play();if(p&&p.catch)p.catch(function(){})}});
+    if(vs.length){v.src=vs[0];if(!RM){var p=v.play();if(p&&p.catch)p.catch(function(){})}}
+  }
+  if(hasMedia)$("#photoNote").hidden=true;
+  var tel=String(CONFIG.phone||"").replace(/[^\d+]/g,"");
+  $$("[data-cfg]").forEach(function(n){var k=n.getAttribute("data-cfg");
+    if(k==="email")n.innerHTML='<span>'+esc(CONFIG.email)+'</span>';
+    else if(k==="phone")n.innerHTML='<span>'+esc(CONFIG.phone)+'</span> &nbsp;<a href="viber://chat?number='+encodeURIComponent(tel)+'" target="_blank" rel="noopener">Viber</a>';
+    else if(k==="address")n.textContent=CONFIG.address;
+    else if(k==="phoneText")n.textContent=CONFIG.phone;
+    else if(k==="emailText")n.textContent=CONFIG.email;
+  });
+  $("#callLink").href="tel:"+tel;
+  $("#viberLink").href="viber://chat?number="+encodeURIComponent(tel);
+  $("#phoneNote").textContent="Call and Viber buttons may not open from inside a website embed. The number is above to copy.";
+})();
+
+/* ---- live strip + toast ---- */
+var latest=PROJECTS.slice(0,3), li=0, liveEl=$("#liveText");
+function setLive(){var p=latest[li%latest.length];liveEl.innerHTML='<b>Delivered</b> &nbsp;'+esc(p.title)+' &nbsp;·&nbsp; '+fmt(p.date);li++}
+setLive();
+if(!RM){setInterval(setLive,4500)}
+var toast=$("#toast"), toasted=false;
+function showToast(){var p=PROJECTS[0];$("#toastText").innerHTML='<span>New delivery</span>'+esc(p.title)+' &middot; '+fmt(p.date);toast.hidden=false;setTimeout(function(){toast.hidden=true},10000)}
+$("#toastX").addEventListener("click",function(){toast.hidden=true});
+
+/* ---- project cards with slideshow thumbnails ---- */
+function poster(p,i,big){
+  var x=18+((i*29)%60), y=14+((i*17)%45);
+  return '<div class="poster" style="--x:'+x+'%;--y:'+y+'%"><span class="tl">'+esc(p.cat)+'</span><span class="mid">Reel '+String(i+1).padStart(2,"0")+'</span><span class="br">'+(big?'Cover placeholder':fmt(p.date))+'</span></div>';
+}
+function thumb(p){
+  var i=PROJECTS.indexOf(p);
+  if(!p.photos||!p.photos.length)return poster(p,i);
+  var x=18+((i*29)%60), y=14+((i*17)%45);
+  return '<div class="poster sl" data-sl="'+p.id+'" style="--x:'+x+'%;--y:'+y+'%"><span class="tl">'+esc(p.cat)+'</span><span class="br">'+fmt(p.date)+'</span></div>';
+}
+function card(p){
+  return '<button class="card" type="button" data-open="'+p.id+'">'+thumb(p)+
+    '<div class="meta mono"><span>'+fmt(p.date)+'</span>'+p.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>'}).join("")+'</div>'+
+    '<h3>'+esc(p.title)+'</h3><span class="more">View project &rarr;</span></button>';
+}
+var slideshows=[];
+function initSlides(root){
+  $$(".poster.sl",root).forEach(function(el){
+    if(el.getAttribute("data-init"))return; el.setAttribute("data-init","1");
+    var p=PROJECTS.filter(function(x){return x.id===el.getAttribute("data-sl")})[0]; if(!p)return;
+    var imgs=[],cur=-1,vis=true,hover=false;
+    p.photos.forEach(function(u,i){
+      var im=new Image(); im.alt=""; im.decoding="async"; if(i>0)im.loading="lazy";
+      var rec={el:im,ok:false,bad:false}; imgs.push(rec);
+      loadInto(im,imgSrcs(u,900),function(){rec.bad=true},function(){rec.ok=true;if(cur<0)show(imgs.indexOf(rec))});
+      el.insertBefore(im,el.firstChild);
+    });
+    function show(n){imgs.forEach(function(r,j){r.el.classList.toggle("on",j===n)});cur=n}
+    function next(){
+      if(!vis||hover||modalOpen())return; var n=cur,tries=0;
+      do{n=(n+1)%imgs.length;tries++}while(tries<=imgs.length&&!imgs[n].ok);
+      if(imgs[n].ok&&n!==cur)show(n);
+    }
+    el.addEventListener("mouseenter",function(){hover=true});el.addEventListener("mouseleave",function(){hover=false});
+    if("IntersectionObserver" in window){new IntersectionObserver(function(es){vis=es[0].isIntersecting},{threshold:.1}).observe(el)}
+    if(!RM&&imgs.length>1){setTimeout(function(){setInterval(next,3400)},Math.random()*1800)}
+  });
+}
+$("#recent").innerHTML=PROJECTS.slice(0,3).map(card).join("");
+var cats=["All"].concat(PROJECTS.map(function(p){return p.cat}).filter(function(c,i,a){return a.indexOf(c)===i}));
+var projCat="All";
+function renderProjects(){
+  $("#projFilters").innerHTML=cats.map(function(c){return '<button class="chip" type="button" data-pc="'+esc(c)+'" aria-pressed="'+(c===projCat)+'">'+esc(c)+'</button>'}).join("");
+  $("#projects").innerHTML=PROJECTS.filter(function(p){return projCat==="All"||p.cat===projCat}).map(card).join("");
+  initSlides($("#projects"));
+}
+renderProjects(); initSlides($("#recent"));
+$("#projFilters").addEventListener("click",function(e){var b=e.target.closest("[data-pc]");if(!b)return;projCat=b.getAttribute("data-pc");renderProjects()});
+
+/* ---- project detail modal ---- */
+var modal=$("#modal"), inq=$("#inq"), lastFocus=null;
+function modalOpen(){return !modal.hidden||!inq.hidden}
+function lock(){document.body.style.overflow="hidden"}
+function unlock(){if(modal.hidden&&inq.hidden)document.body.style.overflow=""}
+function openProject(id){
+  var p=PROJECTS.filter(function(x){return x.id===id})[0]; if(!p)return;
+  var url=p.url||GALLERY_URL, has=p.photos&&p.photos.length, idx=0;
+  lastFocus=document.activeElement;
+  var media=has?'<div class="mmedia"><img id="mImg" alt="'+esc(p.title)+'"><div class="mnav"><button type="button" id="mPrev" aria-label="Previous photo">&larr;</button><span class="mono" id="mCount"></span><button type="button" id="mNext" aria-label="Next photo">&rarr;</button></div></div>':poster(p,PROJECTS.indexOf(p),true);
+  $("#mcard").innerHTML='<button class="x" type="button" id="mClose" aria-label="Close">&times;</button>'+media+
+    '<div class="mbody"><div class="eyebrow">'+esc(p.cat)+' &nbsp;·&nbsp; '+fmt(p.date)+'</div><h2 id="mTitle" style="font-size:clamp(30px,4vw,44px)">'+esc(p.title)+'</h2>'+
+    '<p>'+esc(p.blurb)+'</p><div class="meta mono">'+p.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>'}).join("")+'</div>'+
+    (url?'<a class="btn" style="align-self:flex-start;margin-top:8px" href="'+esc(url)+'" target="_blank" rel="noopener">Open full project &#8599;</a>'
+        :'<span class="btn ghost" style="align-self:flex-start;margin-top:8px;opacity:.55;cursor:default;color:var(--ink);border-color:var(--ink)" aria-disabled="true">Full gallery link coming soon</span>')+'</div>';
+  if(has){
+    var im=$("#mImg");
+    var go=function(n){idx=(n+p.photos.length)%p.photos.length;loadInto(im,imgSrcs(p.photos[idx],1600),null,null);$("#mCount").textContent=(idx+1)+" / "+p.photos.length};
+    go(0);
+    $("#mPrev").onclick=function(){go(idx-1)};$("#mNext").onclick=function(){go(idx+1)};
+    if(p.photos.length<2){$("#mPrev").hidden=true;$("#mNext").hidden=true}
+  }
+  modal.hidden=false; lock(); $("#mClose").focus();
+}
+function closeModal(){modal.hidden=true;unlock();if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+modal.addEventListener("click",function(e){if(e.target===modal||e.target.closest("#mClose"))closeModal()});
+document.addEventListener("click",function(e){var c=e.target.closest("[data-open]");if(c)openProject(c.getAttribute("data-open"))});
+
+/* ---- rental ---- */
+var GL={Cameras:'<rect x="3" y="8" width="26" height="17" rx="2"/><circle cx="16" cy="16.5" r="5"/><path d="M11 8l2-3h6l2 3"/>',
+Lenses:'<circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="16" r="2.5"/>',
+Lighting:'<rect x="5" y="4" width="22" height="14" rx="1.5"/><path d="M16 18v10M10 28h12"/>',
+Audio:'<rect x="12" y="3" width="8" height="16" rx="4"/><path d="M8 14a8 8 0 0 0 16 0M16 22v6M11 28h10"/>',
+Support:'<rect x="11" y="3" width="10" height="4"/><path d="M16 7v8M16 15L7 29M16 15l9 14M16 15v14"/>'};
+var gearCats=["All","Cameras","Lenses","Lighting","Audio","Support"], gearCat="All", picked={};
+function gearById(id){return GEAR.filter(function(x){return x.id===id})[0]}
+function renderGear(){
+  $("#gearFilters").innerHTML=gearCats.map(function(c){return '<button class="chip" type="button" data-gc="'+c+'" aria-pressed="'+(c===gearCat)+'">'+(c==="Support"?"Support &amp; grip":c)+'</button>'}).join("");
+  $("#gear").innerHTML=GEAR.filter(function(g){return gearCat==="All"||g.cat===gearCat}).map(function(g){
+    var on=!!picked[g.id];
+    return '<article class="item'+(on?' on':'')+'"><div class="top"><div class="gthumb" data-gp="'+g.id+'"><svg viewBox="0 0 32 32" aria-hidden="true">'+GL[g.cat]+'</svg></div><div class="txt"><span class="mono">'+g.cat+'</span><h3>'+esc(g.name)+'</h3></div></div><p>'+esc(g.spec)+'</p>'+
+      '<div class="foot"><span class="mono">Rate on request</span><button class="btn sm'+(on?'':' ghost')+'" type="button" data-pick="'+g.id+'">'+(on?'Added &#10003;':'Add to list')+'</button></div></article>';
+  }).join("");
+  $$("[data-gp]",$("#gear")).forEach(function(box){
+    var g=gearById(box.getAttribute("data-gp")); if(!g||!g.photo)return;
+    var im=new Image(); im.alt=""; im.loading="lazy";
+    loadInto(im,imgSrcs(g.photo,300),null,function(){box.innerHTML="";box.appendChild(im)});
+  });
+}
+function renderList(){
+  var ids=Object.keys(picked);
+  $("#listBody").innerHTML=ids.length?'<ul>'+ids.map(function(id){return '<li><span>'+esc(gearById(id).name)+'</span><button type="button" data-drop="'+id+'">Remove</button></li>'}).join("")+'</ul>':'<p class="empty">Nothing selected yet. Add equipment from the list.</p>';
+}
+$("#gearFilters").addEventListener("click",function(e){var b=e.target.closest("[data-gc]");if(!b)return;gearCat=b.getAttribute("data-gc");renderGear()});
+$("#gear").addEventListener("click",function(e){var b=e.target.closest("[data-pick]");if(!b)return;var id=b.getAttribute("data-pick");if(picked[id])delete picked[id];else picked[id]=1;renderGear();renderList()});
+$("#listBody").addEventListener("click",function(e){var b=e.target.closest("[data-drop]");if(!b)return;delete picked[b.getAttribute("data-drop")];renderGear();renderList()});
+$("#sendList").addEventListener("click",function(){openInquiry("rental")});
+renderGear();renderList();
+
+/* ---- team ---- */
+var SIL='<svg class="fig" viewBox="0 0 300 520" aria-hidden="true" style="--rot:ROTdeg"><circle cx="150" cy="86" r="52"/><path d="M70 170c20-22 140-22 160 0l22 150-56 4-6 120h-80l-6-120-56-4z"/></svg>';
+function renderTeam(){
+  $("#teamGrid").innerHTML=TEAM.map(function(m,i){
+    var first=esc(String(m.name).split(" ")[0]);
+    return '<article class="person"><div class="pframe"><div class="pbg v'+(i%3)+'" data-pb="'+i+'"><span class="pname">'+first+'</span></div>'+
+      (m.png?'<img class="fig" data-pf="'+i+'" alt="'+esc(m.name)+'" style="--rot:'+(m.rot||0)+'deg" hidden>':SIL.replace("ROT",(m.rot||0)))+
+      '</div><div class="pcap"><h3>'+esc(m.name)+'</h3><span class="mono">'+esc(m.role)+'</span><p>'+esc(m.line)+'</p></div></article>';
+  }).join("");
+  TEAM.forEach(function(m,i){
+    if(m.back){var bg=$('[data-pb="'+i+'"]'),im=new Image();im.className="back";im.alt="";loadInto(im,imgSrcs(m.back,1200),null,function(){bg.insertBefore(im,bg.firstChild)})}
+    if(m.png){var f=$('[data-pf="'+i+'"]');loadInto(f,imgSrcs(m.png,1400,true),function(){f.outerHTML=SIL.replace("ROT",(m.rot||0))},function(){f.hidden=false})}
+  });
+}
+renderTeam();
+
+/* ---- inquiry ---- */
+var mode="shoot";
+function setMode(m){
+  mode=m;
+  $$(".seg button").forEach(function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-mode")===m))});
+  $("#fShoot").hidden=m!=="shoot";$("#fRental").hidden=m!=="rental";
+  $("#iErr").textContent="";renderInqList();
+}
+function renderInqList(){
+  var ids=Object.keys(picked);
+  $("#iList").innerHTML=ids.length?ids.map(function(id){return '<span>'+esc(gearById(id).name)+'<button type="button" data-idrop="'+id+'" aria-label="Remove">&times;</button></span>'}).join(""):'<span class="empty" style="border:0;padding:0">Nothing selected. Choose gear on the Rental page first.</span>';
+}
+$("#iList").addEventListener("click",function(e){var b=e.target.closest("[data-idrop]");if(!b)return;delete picked[b.getAttribute("data-idrop")];renderInqList();renderGear();renderList()});
+function openInquiry(m){
+  lastFocus=document.activeElement;
+  $("#iForm").hidden=false;$("#iDone").hidden=true;$("#iFallback").hidden=true;$(".seg").hidden=false;
+  var t=todayStr();["sDate","rFrom","rTo"].forEach(function(id){$("#"+id).min=t});
+  setMode(m||mode);inq.hidden=false;lock();$("#iEmail").focus();
+}
+function closeInquiry(){inq.hidden=true;unlock();if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$(".seg").addEventListener("click",function(e){var b=e.target.closest("[data-mode]");if(b)setMode(b.getAttribute("data-mode"))});
+$("#iClose").addEventListener("click",closeInquiry);$("#iDoneClose").addEventListener("click",closeInquiry);
+inq.addEventListener("click",function(e){if(e.target===inq)closeInquiry()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(!inq.hidden)closeInquiry();else if(!modal.hidden)closeModal()}});
+$("#inquire").addEventListener("click",function(){openInquiry(currentView==="rental"&&Object.keys(picked).length?"rental":"shoot")});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-inq]");if(b)openInquiry(b.getAttribute("data-inq"))});
+
+function copyText(txt,note,okMsg){
+  function ok(){if(note)note.textContent=okMsg}
+  function fb(){var t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();var done=false;try{done=document.execCommand("copy")}catch(e){}document.body.removeChild(t);if(note)note.textContent=done?okMsg:"Copying is blocked here. Select the text and copy it by hand."}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,fb)}else{fb()}
+}
+$("#copyPhone").addEventListener("click",function(){copyText(CONFIG.phone,$("#phoneNote"),"Number copied.")});
+$("#iCopyMsg").addEventListener("click",function(){copyText($("#iMsg").value,$("#iCopyNote"),"Message copied.")});
+
+function collect(){
+  var d={name:$("#iName").value.trim(),email:$("#iEmail").value.trim()};
+  if(mode==="shoot"){
+    d.type="Shoot";d.from=$("#sDate").value;d.to="";d.purpose=$("#sType").value;d.items="";
+    d.details="Where: "+$("#sPlace").value+($("#sNotes").value.trim()?"\n"+$("#sNotes").value.trim():"");
+  }else{
+    d.type="Rental";d.from=$("#rFrom").value;d.to=$("#rTo").value;d.purpose=$("#rPurpose").value.trim();
+    d.items=Object.keys(picked).map(function(id){return gearById(id).name}).join(", ");d.details=$("#rNotes").value.trim();
+  }
+  return d;
+}
+function validate(d){
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))return "Please enter a valid email so we can reply.";
+  if(!d.from)return mode==="shoot"?"Please choose a preferred date.":"Please choose a pickup date.";
+  if(mode==="rental"){
+    if(!d.to)return "Please choose a return date.";
+    if(d.to<d.from)return "The return date is before the pickup date.";
+    if(!d.purpose)return "Please tell us the purpose of the rental.";
+    if(!d.items)return "Add at least one piece of equipment first.";
+  }
+  return "";
+}
+function buildMessage(d){
+  var L=[(d.type==="Shoot"?"Shoot inquiry":"Rental inquiry")+" - Lumo Room",""];
+  if(d.name)L.push("Name: "+d.name);
+  L.push("Email: "+d.email);
+  if(d.type==="Shoot"){L.push("Type of shoot: "+d.purpose,"Preferred date: "+d.from)}
+  else{L.push("Pickup: "+d.from,"Return: "+d.to,"Purpose: "+d.purpose,"Equipment: "+d.items)}
+  if(d.details)L.push("",d.details);
+  return L.join("\n");
+}
+function mailFallback(d){
+  var msg=buildMessage(d), subj=(d.type==="Shoot"?"Shoot inquiry":"Rental inquiry")+(d.name?" - "+d.name:"");
+  var href="mailto:"+CONFIG.email+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(msg);
+  $("#iMsg").value=msg;$("#iMail").href=href;$("#iCopyNote").textContent="";
+  $("#iForm").hidden=true;$(".seg").hidden=true;$("#iFallback").hidden=false;
+  var a=document.createElement("a");a.href=href;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+$("#iForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var d=collect(),err=validate(d);$("#iErr").textContent=err;if(err)return;
+  var F=CONFIG.form;
+  if(F&&F.url&&F.fields&&F.fields.email&&typeof fetch==="function"){
+    var body=new URLSearchParams();
+    Object.keys(F.fields).forEach(function(k){if(F.fields[k]&&d[k]!=null)body.append(F.fields[k],d[k])});
+    $("#iSend").disabled=true;$("#iSend").textContent="Sending...";
+    fetch(F.url,{method:"POST",mode:"no-cors",body:body}).then(function(){
+      $("#iSend").disabled=false;$("#iSend").textContent="Send inquiry";
+      $("#iForm").hidden=true;$(".seg").hidden=true;$("#iDone").hidden=false;
+      if(d.type==="Rental"){picked={};renderGear();renderList()}
+    },function(){$("#iSend").disabled=false;$("#iSend").textContent="Send inquiry";mailFallback(d)});
+  }else{mailFallback(d)}
+});
+
+/* ---- view routing ---- */
+var views=$$("[data-view]"), navLinks=$$("a.nl"), currentView="home";
+function show(name,cat){
+  if(!views.some(function(v){return v.getAttribute("data-view")===name}))name="home";
+  currentView=name;
+  views.forEach(function(v){v.hidden=v.getAttribute("data-view")!==name});
+  navLinks.forEach(function(a){if(a.getAttribute("data-nav")===name)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  if(name==="rental"&&cat){gearCat=cat;renderGear()}
+  try{if(location.hash!=="#"+name)history.replaceState(null,"","#"+name)}catch(e){}
+  window.scrollTo(0,0);
+  if(name==="home"&&!toasted){toasted=true;setTimeout(function(){if(modalOpen())return;showToast()},3000)}
+}
+document.addEventListener("click",function(e){
+  var a=e.target.closest("[data-nav]");
+  if(a){e.preventDefault();show(a.getAttribute("data-nav"),a.getAttribute("data-cat"))}
+});
+window.addEventListener("hashchange",function(){var h=location.hash.replace("#","");if(h&&h!=="contact")show(h)});
+(function(){var h=(location.hash||"#home").replace("#","");show(h==="contact"?"home":h)})();
+</script>
+
+</body></html>
