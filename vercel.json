@@ -2,12 +2,8 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/favicon.ico",
-      "destination": "/favicon.svg"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/Lumo-2.html"
+      "destination": "/Lumo-Room_Index.html"
     }
   ]
 }
