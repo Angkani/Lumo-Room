@@ -26,6 +26,9 @@
       add or change rental gear ....................... [var GEAR]
       change phone, email, socials, logo .............. [LUMO SETTINGS], then CONFIG
       turn the camera screen on or off ................ CONFIG: camera: { show: false }
+      change where the camera focuses / how sharp ..... [EASY TWEAKS]  --cam-focus-x, --cam-focus-blur, --cam-sharpen
+      turn only the focus effect off .................. CONFIG: camera: { focus: false }
+      turn the soft first-visit option preview on/off . CONFIG: camera: { peek: true or false }
       albums per row on the catalog ................... CONFIG: catalog: { columns: 2 }
       use my own brand icons .......................... a folder named icons/ next to this file (CONFIG: icons)
       change the fonts ................................ CONFIG: fonts
@@ -100,6 +103,15 @@
   --cam-value-weight-hover: 600;     /* values while hovered (bold) */
   --cam-value-opacity: .62;          /* how bright the values are at rest, 0 to 1 */
   --cam-grid-opacity: .14;           /* brightness of the rule-of-thirds lines */
+
+  /* ---------- HOME: the camera focus (the box finds its point, the picture goes soft then snaps sharp) ---------- */
+  --cam-focus-x: 66.67%;             /* where the focus box sits, from the left edge of the frame (0% left ... 100% right). 66.67% = the right-hand third line */
+  --cam-focus-y: 33.33%;             /* where it sits from the top (0% top ... 100% bottom). 33.33% = the upper third line */
+  --cam-focus-blur: 4px;             /* how soft the picture gets while the camera hunts. 0px = no hunting, 2px = very light, 6px = obvious */
+  --cam-focus-time: 1.4s;            /* how long one hunt takes, from soft to locked */
+  --cam-sharpen: .15;                /* how crisp the locked picture is. 0 = off, .08 = barely, .15 = subtle, .3 = strong, .5 = too much */
+  --cam-tap-focus: 1;                /* 1 = clicking or tapping the picture moves the focus point there, 0 = off */
+  --cam-focus-idle: 1;               /* 1 = in AF-C the camera now and then refocuses a tiny bit on its own, 0 = off */
 
   /* ---------- CATALOG PAGE  (how many albums per row is  CONFIG: catalog: { columns } ) ---------- */
   --catalog-ratio: 3/2;                                  /* shape of each album picture: 3/2 landscape, 16/9 wider, 4/3 taller */
@@ -781,15 +793,22 @@ a.ibtn:hover .bimg,a.slk:hover .bimg{filter:brightness(0) invert(calc(1 - var(--
 .thirds b::before,.thirds b::after{content:"";position:absolute;background:rgba(244,241,233,.4)}
 .thirds b::before{left:0;right:0;top:50%;height:1px}.thirds b::after{top:0;bottom:0;left:50%;width:1px}
 .thirds .p1{left:33.3333%;top:33.3333%}.thirds .p2{left:66.6667%;top:33.3333%}.thirds .p3{left:33.3333%;top:66.6667%}.thirds .p4{left:66.6667%;top:66.6667%}
-.af{position:absolute;left:66.6667%;top:33.3333%;width:clamp(4rem,6.4vw,7rem);aspect-ratio:1.2;transform:translate(-50%,-50%);animation:aflock 1.5s var(--ease) 1.2s backwards}
-.af i{position:absolute;width:26%;height:30%;border:2px solid var(--gold-hi)}
+.af{position:absolute;left:66.6667%;top:33.3333%;width:clamp(4rem,6.4vw,7rem);aspect-ratio:1.2;transform:translate(-50%,-50%);transform-origin:0 0;transition:left .85s var(--ease),top .85s var(--ease),scale .6s var(--ease),opacity .6s var(--ease)}
+.af i{position:absolute;width:26%;height:30%;border:2px solid var(--gold-hi);transition:border-color .45s var(--ease)}
 .af i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}.af i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
 .af i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}.af i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
-.af span{position:absolute;left:50%;top:calc(100% + 0.5rem);transform:translateX(-50%);font-size:0.6875rem;font-weight:600;letter-spacing:.08em;color:var(--gold-hi);white-space:nowrap}
-.hero[data-af="AF-C"] .af{animation:aflock 1.5s var(--ease) 1.2s backwards,afc 3.2s ease-in-out 2.8s infinite}
-.hero[data-af="MF"] .af{opacity:0;transition:opacity .4s var(--ease)}
-@keyframes aflock{0%{opacity:0;transform:translate(-50%,-50%) scale(2.1)}55%{opacity:1;transform:translate(-50%,-50%) scale(.9)}100%{transform:translate(-50%,-50%) scale(1)}}
-@keyframes afc{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.07)}}
+.af span{position:absolute;left:50%;top:calc(100% + 0.5rem);transform:translateX(-50%);font-size:0.6875rem;font-weight:600;letter-spacing:.08em;color:var(--gold-hi);white-space:nowrap;transition:color .45s var(--ease)}
+/* focus states: cream and a little wider while it searches, gold and snug once it has locked, one soft ring when it locks */
+.af.seek{scale:1.22}
+.af.seek i{border-color:rgba(244,241,233,.6)}
+.af.seek span{color:rgba(244,241,233,.5)}
+.af::after{content:"";position:absolute;inset:0;border:1px solid var(--gold-hi);opacity:0;pointer-events:none}
+.af.ping::after{animation:afping 1.1s var(--ease)}
+@keyframes afping{0%{opacity:.7;scale:.9}100%{opacity:0;scale:1.5}}
+.hero[data-af="AF-C"] .af:not(.seek){animation:afidle 4.2s ease-in-out infinite}
+@keyframes afidle{0%,100%{translate:0 0;scale:1}50%{translate:2px -1px;scale:1.045}}
+.hero[data-af="MF"] .af{opacity:0!important}
+@media (hover:hover) and (pointer:fine){.hero.fx-on:not([data-af="MF"]){cursor:crosshair}.hero.fx-on a,.hero.fx-on button{cursor:pointer}}
 /* HUD: a quiet camera readout. Everything is dim on purpose; a setting only brightens when you hover it.
    Sizes, weights and brightness are the --cam-* numbers in EASY TWEAKS at the top of the file. */
 .hero .wrap{align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding-top:5.75rem;padding-bottom:11.875rem}
@@ -1022,7 +1041,7 @@ html{font-size:var(--ui-size)}
   .ahero img,.cp img{transition:none;filter:none}
   .adev i::after{animation:none}
   .al .go,.nt,.nc{transition:none}
-  .cs.peek .cl2,.hv-gr,.thirds>i,.thirds b,.af,.hero[data-af="AF-C"] .af,.cs.peek .pv,.cs.peek .nx,.mw::after{animation:none!important}
+  .cs.peek .cl2,.hv-gr,.thirds>i,.thirds b,.af,.af.ping::after,.hero[data-af="AF-C"] .af,.cs.peek .pv,.cs.peek .nx,.mw::after{animation:none!important}
   [data-view].enter{animation:none}
   .tick{animation:none}
   .tickview{overflow-x:auto}
@@ -1076,7 +1095,7 @@ html{font-size:var(--ui-size)}
       <div class="af" id="af"><i></i><i></i><i></i><i></i><span>AF-C</span></div>
     </div>
     <div class="wrap">
-      <div class="eyebrow">Lumo Room and Lumo Rentals</div>
+      <div class="eyebrow">Lumo Room &nbsp;·&nbsp; Lumo Rentals</div>
       <h1>Lumo</h1>
       <p class="lead">Illuminate</p>
       <div class="cta">
@@ -1090,7 +1109,7 @@ html{font-size:var(--ui-size)}
       </div>
       <div class="cam cam-bot">
         <div class="camL">
-          <!-- <div class="camhint" id="camHint"><span class="mw" aria-hidden="true"></span><span id="camHintTx">Hover a setting, then scroll</span></div> -->
+          <!-- <div class="camhint" id="camHint"><span class="mw" aria-hidden="true"></span><span id="camHintTx">Hover a setting and scroll &middot; click the picture to focus</span></div> -->
           <div class="csrow" id="camRow" role="group" aria-label="Camera settings"></div>
           <button class="cmob" id="camMob" type="button" aria-label="Change look"><span class="cmL">Look</span><span class="cmN" id="camLookN">Studio</span><span class="cmS" id="camLookS"></span><span class="cmT">Tap to change the look</span></button>
         </div>
@@ -1102,7 +1121,7 @@ html{font-size:var(--ui-size)}
   <div class="band sc-t">
     <div class="wrap">
       <div class="eyebrow">What we do</div>
-      <h2 style="margin-top:0.875rem;max-width:40ch">One collective, <em>every frame</em> of the story</h2>
+      <h2 style="margin-top:0.875rem;max-width:40ch">One room, <em>every stage</em> of the shoot.</h2>
       <div class="cols3">
         <div><h3>Production</h3><p>Film, photo and highlight edits planned, shot and finished by one team, so the look stays consistent from first frame to final export.</p><a class="arrow" href="#catalog" data-nav="catalog">See the work</a></div>
         <div><h3>The studio</h3><p>An indoor studio built for controlled light and sound. Bring a concept, a product or a crew and shoot without worrying about weather.</p><button class="arrow" type="button" data-inq="shoot">Book a visit</button></div>
@@ -1206,8 +1225,8 @@ html{font-size:var(--ui-size)}
       <div class="thead">
         <div>
           <div class="eyebrow">Behind the lens</div>
-          <h2 style="margin-top:0.875rem;max-width:14ch">Lumo, <em>people.</em></h2>
-          <p class="lead" style="margin-top:1.125rem">Curious about us?.</p>
+          <h2 style="margin-top:0.875rem;max-width:14ch">Lumo <em>people.</em></h2>
+          <p class="lead" style="margin-top:1.125rem">Curious About Us?</p>
         </div>
         <div class="tgroup" id="tgroup" hidden></div>
       </div>
@@ -1442,9 +1461,12 @@ var CONFIG = {
      On a computer, hover a setting (shutter, aperture, ISO, white balance, picture profile like S-Log3, focus, format) and scroll to change it.
      On a phone it stays calm: one tap on the "Look" line at the bottom switches the whole look (Studio, Low light, S-Log3, Mono).
      show  = true or false, turns the viewfinder overlay on or off.
+     focus = true or false, the autofocus effect: the focus box finds its point, the picture goes soft then snaps sharp.
+             (how soft, how fast, where the point sits and how sharp the picture ends are in EASY TWEAKS at the top: --cam-focus-*, --cam-sharpen)
+     peek  = true or false. true = on the first visit the options above and below each setting fade in once, softly, as a hint. false = no hint (the settings only show their options when hovered).
      start = the settings it opens with, written as the text you see on screen, e.g.  start: { iso: "1600", pp: "S-Log3" }
              names you can use: ss, f, iso, wb, pp, af, fmt.  Leave {} for the defaults. */
-  camera: { show: true, start: {} },
+  camera: { show: true, focus: true, peek: false, start: {} },
 
   /* THE ROLLING BAR under the menu.
      Pick which albums roll there, in one of three ways (first one that applies wins):
@@ -1474,7 +1496,7 @@ var CONFIG = {
 var PROJECTS = [
   {id:"p1",title:"Edha Eloise's Baptism",cat:"Christening",date:"2026-09-27",tags:["Photo"],blurb:"",url:"https://sites.google.com/view/edhaeloise-baptism-excel/home",photos:["1BsWI5C9SPxQq0bEdzEQEgwLyln_FQEsQ", "1iNX946Wqevpn2LGNUBdeAhqi-uXk--UE", "1ftUTYi22uG3NYQhek0VRVPYWaneA3uBW", "1rnHX5S8Em7HEsGIRyJfjQhSJ08B7ESFw", "1Sub0hVfqELxPDwuDq28CN118NsiAxfOs", "1gqyGieiwl4yVrZd7dANk_Qkq_LX90NJU", "1TKSHOCVvg6CQpTsHqMj5HaOn7ZsZW_w9", "1Yrc9w_iAtmm_Ban-0xuBPLx_hGlc7HUi", "1Q1PcezGG_LFC8GqE2FpHS_hWywylZW1n", "1UbXobiAtGpu4DJOFTfL9Itr8pmwdimCr", "1mqjrja9tI_B2wgN06r0mn_FEzG0Fg0xM", "1wrGv-DbGR-OPJj7AgPWG72OjkZkQA6HL", "1XXRqff-ry7rEdz9eiy6x56UaHQGbHnfx"],recent:true,badge:"New album"},
   {id:"p2",title:"1st Kirsten Hyacint Birthday Coverage",cat:"Birthday",date:"2026-10-12",tags:["Photo","Video"],blurb:"",url:"https://sites.google.com/view/kirsten-first-birthday/kirsten-1st-birthday",photos:["1PEb7K6hCM_2eZ9VmUG31oqui5bZ3KOuN", "1S7rGmJ6cypJ3T9QjnsBZMfWgkWn8HS9r", "19-J_muZPLV8-ybvrFC66V4E7xvb0JSFn", "1lduhUrUPSbwtdnHeST-LaqLVKMVVKnsK", "1mxGkg4SHa7FvDOg7HKzPN1XCG63r9zu6"],recent:true,badge:"New album"},
-  {id:"p3",title:"Julienne's Decade & Eight",cat:"Debut",date:"2026-10-03",tags:["Film","Photo","Editorial"],blurb:"",url:"https://sites.google.com/view/lumo-room/julienne-debut",photos:["1GSHsge3cKGumJJZ7hogqmvsMYml_xCOe", "1X_RPVrU2c9kRQjqI3b_0dRs_xE07tZpf", "1MuFdqW_fH0UZzuI05wAvx9ipzNqLC4JN", "1T5HRDQFv59m_UmZX5Ss-7oUqTvhmBbLo", "1eNu-aQrGE6Vv5b597luoBnweod6s3ubP", "1E3ZMlkAg9KMPxlset-OkjeQ3Rzt8abfu", "1Mu2cvd5UQCS4BBElcelKdAQpuh3Ift3b", "1O9OZFliNhW9K14pmOT0kZryHD9gvqfDp", "1z1T8Ahnwjcoa_bVFiPVs6Df8MwTCqpXH", "1pkAjxmcf-Q8O6Qk3H6fA_eV6NcAaXfBK", "1cSWHs_tO0CnvBmz7HIk3SgAUSCT1Am49", "1FViA4JfyUOduT_pfoeRyrIUQpbxXiaDl", "1HlgW_XRSdm4Jc1iaKUIpkZljCY-reqlc", "1FtKyeQQwK63XF5bRsPFCj4m9zZH66LpL", "1AzPN5xXpwokPkD_bixDgaOVu6Gf8FXmj", "1ghi2_64Y_Sv9lRzKZokzRTbr_ESsG_GJ"],recent:true,badge:"Highlights"},
+  {id:"p3",title:"Julienne's Decade & Eight",cat:"Debut",date:"2026-10-03",tags:["Film","Photo","Editorial"],blurb:"",url:"https://sites.google.com/view/lumo-room/julienne-debut",photos:["1GSHsge3cKGumJJZ7hogqmvsMYml_xCOe", "1GSHsge3cKGumJJZ7hogqmvsMYml_xCOe", "1X_RPVrU2c9kRQjqI3b_0dRs_xE07tZpf", "1MuFdqW_fH0UZzuI05wAvx9ipzNqLC4JN", "1T5HRDQFv59m_UmZX5Ss-7oUqTvhmBbLo", "1eNu-aQrGE6Vv5b597luoBnweod6s3ubP", "1E3ZMlkAg9KMPxlset-OkjeQ3Rzt8abfu", "1Mu2cvd5UQCS4BBElcelKdAQpuh3Ift3b", "1O9OZFliNhW9K14pmOT0kZryHD9gvqfDp", "1z1T8Ahnwjcoa_bVFiPVs6Df8MwTCqpXH", "1pkAjxmcf-Q8O6Qk3H6fA_eV6NcAaXfBK", "1cSWHs_tO0CnvBmz7HIk3SgAUSCT1Am49", "1FViA4JfyUOduT_pfoeRyrIUQpbxXiaDl", "1HlgW_XRSdm4Jc1iaKUIpkZljCY-reqlc", "1FtKyeQQwK63XF5bRsPFCj4m9zZH66LpL", "1AzPN5xXpwokPkD_bixDgaOVu6Gf8FXmj", "1ghi2_64Y_Sv9lRzKZokzRTbr_ESsG_GJ"],recent:true,badge:"Highlights"},
   {id:"p4",title:"Product Campaign",cat:"Commercial",date:"2026-09-21",tags:["Photo","Studio","Outdoor"],blurb:"",url:"",photos:["1Sj0nfwgtFvEoRvvmKcRMfdu6b-8p4o4a", "199V29AeDEjppn5uvmJ8ow0LWx_iAeaXQ", "1-T9gis52yPpm5CUlWoGpyoVudM0VwDW3", "1VHKBmeUmH_tI6DL1h8IA18FIPgn1nLch", "1FylGbPXHFcXk8FefbSYR7D-F6Dxbk52D", "1SDc-t7re8HTXO2WdoorHX2RwtokLm7tr", "1_FjBWDQM8DwMpYA6rs3TgJjtw1DgSNgy", "1MUtvYT9oQv4q4e-t_fQsrJFTeBYgKrqO", "13b4jnaX05-Fwav7cGb6YilDeaxxJe2j4", "1MyVieIMQ_muq4liFFD3i6QBN5wFmWN4V", "1oVPQECFtqfsyFEnN_mHuuc1EOcj9tLh0"]},
   {id:"p5",title:"Corporate Profile",cat:"Corporate",date:"2026-09-09",tags:["Film","Interview"],blurb:"",url:"",photos:[]},
   {id:"p6",title:"Wedding Film",cat:"Wedding",date:"2026-08-30",tags:["Film","Photo"],blurb:"",url:"",photos:[]},
@@ -2185,7 +2207,7 @@ var TEAM = [
    links:[{label:"Portfolio",url:""},{label:"Website",url:""},{label:"Instagram",url:"https://www.instagram.com/jide_isoff/"},{label:"Facebook",url:""}],
    email:"",phone:""},
 
- {cam:"Cam B",name:"Vann",nick:"",role:"Photography · Cinematography",rot:2.5,size:65,x:0,y:0,png:"1hLNS1nF04KQuitWFdOQ55nZN1VjtN0bZ",back:"1hLNS1nF04KQuitWFdOQ55nZN1VjtN0bZ",
+  {cam:"Cam B",name:"Vann",nick:"",role:"Photography · Lighting",rot:2.5,size:65,x:0,y:0,png:"1hLNS1nF04KQuitWFdOQ55nZN1VjtN0bZ",back:"1hLNS1nF04KQuitWFdOQ55nZN1VjtN0bZ",
    quote:"okayy.",
    about:"eto muna.",
    facts:[{k:"Signature gear",v:"kahit ano na muna din"},{k:"Favorite shot",v:"hahaha lagay kalang"},{k:"Fuel on set",v:"ano ah..."}],
@@ -2338,7 +2360,7 @@ function swChip(x){x=swItem(x);return x&&x.name?'<span class="swc">'+swBadge(x)+
   var fl=CONFIG.logoDark||CONFIG.logo;
   if(fl){var f=$("#footImg");f.className=(CONFIG.logoMono&&!CONFIG.logoDark)?"mono-d":"";loadInto(f,imgSrcs(fl,400,true),null,function(){f.hidden=false})}
   var hasMedia=false;
-  if(CONFIG.heroPhoto){var h=$("#heroImg");hasMedia=true;loadInto(h,imgSrcs(CONFIG.heroPhoto,2000),null,function(){h.hidden=false})}
+  if(CONFIG.heroPhoto){var h=$("#heroImg");hasMedia=true;loadInto(h,imgSrcs(CONFIG.heroPhoto,(window.devicePixelRatio||1)>1.25?2560:2000),null,function(){h.hidden=false})}
   if(CONFIG.heroVideo){
     var v=$("#heroVid"),vs=videoSrcs(CONFIG.heroVideo),k=0;hasMedia=true;
     v.muted=true;
@@ -3315,7 +3337,7 @@ window.fxWatch();
   function g(x,m,sd){return Math.exp(-Math.pow((x-m)/sd,2)/2)}
 
   row.innerHTML=ORDER.map(function(k){var d=SET[k],w=d.v.reduce(function(a,b){return String(b).length>String(a).length?b:a},"");
-    return '<div class="cs'+(d.d?' cd':'')+' peek" data-k="'+k+'" tabindex="0" role="spinbutton" aria-label="'+d.name+'"><span class="cl2">'+d.l+'</span><span class="cv"><span class="sz">'+esc(w)+'</span><span class="pv" data-d="-1"></span><b class="cur" data-d="1"></b><span class="nx" data-d="1"></span></span></div>';
+    return '<div class="cs'+(d.d?' cd':'')+(CC.peek===true?' peek':'')+'" data-k="'+k+'" tabindex="0" role="spinbutton" aria-label="'+d.name+'"><span class="cl2">'+d.l+'</span><span class="cv"><span class="sz">'+esc(w)+'</span><span class="pv" data-d="-1"></span><b class="cur" data-d="1"></b><span class="nx" data-d="1"></span></span></div>';
   }).join("");
   $$(".cs",row).forEach(function(c,i){c.style.setProperty("--pd",(2.1+i*.22)+"s")});
   var meter=$("#camMeter"),hist=$("#camHist");
@@ -3377,7 +3399,7 @@ window.fxWatch();
   function played(){if(hero.classList.contains("played"))return;hero.classList.add("played");$$(".cs.peek",row).forEach(function(c){c.classList.remove("peek")})}
   function step(k,dir){
     var S=SET[k],n=S.v.length;
-    S.i=(S.i+dir+n)%n;paint(k,dir);apply();played();
+    S.i=(S.i+dir+n)%n;paint(k,dir);apply();played();if(k==="af")afChanged();
   }
   ORDER.forEach(function(k){paint(k,0)});apply();
 
@@ -3432,6 +3454,134 @@ window.fxWatch();
     drawTC();
   },42);
   else drawTC();
+
+  /* ---- camera focus: the box finds its point, the picture hunts (soft, a little past focus, back) and locks sharp ----
+     Click or tap the picture to move the focus point.  The numbers (where it sits, how soft, how long, how sharp) are in EASY TWEAKS: --cam-focus-*, --cam-sharpen. */
+  var FX={on:CC.focus!==false&&!!$("#af")},FS={u:.6667,v:.3333,ready:false,busy:false,b:0,sc:1,k:0},tok=0,sTok=0,vis=true,hidAt=0;
+  var afEl=$("#af"),thirds=$(".thirds"),media=[$("#heroImg"),$("#heroVid")].filter(Boolean);
+  function smooth(x){return x*x*(3-2*x)}
+  function pingBox(){afEl.classList.remove("ping");void afEl.offsetWidth;afEl.classList.add("ping")}
+  if(FX.on){
+    var rs=getComputedStyle(document.documentElement);
+    var rv=function(n,d){var x=parseFloat(rs.getPropertyValue(n));return isNaN(x)?d:x};
+    var rt=function(n,d){var q=String(rs.getPropertyValue(n)).trim(),x=parseFloat(q);return isNaN(x)?d:(/ms$/.test(q)?x/1000:x)};
+    FS.u=clamp(rv("--cam-focus-x",66.67)/100,.05,.95);FS.v=clamp(rv("--cam-focus-y",33.33)/100,.07,.93);
+    FX.blur=Math.max(0,rv("--cam-focus-blur",4));FX.time=clamp(rt("--cam-focus-time",1.4),.5,5);
+    FX.sharp=clamp(rv("--cam-sharpen",.15),0,.6);FX.tap=rv("--cam-tap-focus",1)>0;FX.idle=rv("--cam-focus-idle",1)>0;
+    if(FX.sharp>0&&!document.getElementById("lumoSharp")){
+      var sv=document.createElement("div");
+      sv.innerHTML='<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="lumoSharp" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feConvolveMatrix id="lumoSharpK" order="3" kernelMatrix="0 0 0 0 1 0 0 0 0" divisor="1" edgeMode="duplicate" preserveAlpha="true"/></filter></svg>';
+      document.body.appendChild(sv.firstChild);
+    }
+  }
+  /* the picture: blur while hunting, a light sharpen that is always on once locked, and a tiny focus-breathing zoom around the focus point */
+  function paintF(){
+    // the sharpen is dropped while the picture is clearly soft (it would do nothing there, and the picture is cheaper to draw without it)
+    var f=(FX.sharp>0&&FS.b<.45?"url(#lumoSharp)":"")+(FS.b>.04?" blur("+FS.b.toFixed(2)+"px)":"");
+    var t=Math.abs(FS.sc-1)>.0002?"scale("+FS.sc.toFixed(4)+")":"";
+    media.forEach(function(m){m.style.filter=f||"none";m.style.transform=t});
+  }
+  function setKernel(a){
+    var k=document.getElementById("lumoSharpK");if(!k)return;
+    var n=-a,c=1+4*a;
+    k.setAttribute("kernelMatrix",[0,n,0,n,c,n,0,n,0].map(function(x){return x.toFixed(3)}).join(" "));
+  }
+  function rampSharp(to){
+    if(!(FX.sharp>0)||Math.abs(FS.k-to)<.002)return;
+    var from=FS.k,t0=0,id=++sTok;
+    requestAnimationFrame(function f(n){
+      if(id!==sTok)return;
+      if(!t0)t0=n;
+      var t=clamp((n-t0)/700,0,1);
+      FS.k=from+(to-from)*smooth(t);setKernel(FS.k);
+      if(t<1)requestAnimationFrame(f);
+    });
+  }
+  function origin(){
+    var hr=hero.getBoundingClientRect(),tr=thirds.getBoundingClientRect();if(!hr.width||!tr.width)return;
+    var o=((tr.left-hr.left+FS.u*tr.width)/hr.width*100).toFixed(2)+"% "+((tr.top-hr.top+FS.v*tr.height)/hr.height*100).toFixed(2)+"%";
+    media.forEach(function(m){m.style.transformOrigin=o});
+  }
+  function place(u,v){FS.u=u;FS.v=v;afEl.style.left=(u*100).toFixed(2)+"%";afEl.style.top=(v*100).toFixed(2)+"%";origin()}
+  /* one hunt: the lens goes soft, passes through focus, overshoots a little, comes back and settles (a damped swing) */
+  function hunt(B,dur,ramp,done){
+    var id=++tok,t0=0;FS.busy=true;
+    requestAnimationFrame(function fr(now){
+      if(id!==tok)return;
+      if(!t0)t0=now;
+      var t=clamp((now-t0)/(dur*1000),0,1);
+      var r=ramp?smooth(clamp(t/.14,0,1)):1,tail=t>.8?1-smooth((t-.8)/.2):1;
+      var d=B*Math.exp(-3.2*t)*Math.cos(2.9*Math.PI*t)*r*tail;
+      FS.b=Math.abs(d);FS.sc=1+.006*d/Math.max(FX.blur,1);
+      paintF();
+      if(t<1)requestAnimationFrame(fr);else if(done)done();
+    });
+  }
+  function settle(ping){
+    FS.b=0;FS.sc=1;FS.busy=false;paintF();rampSharp(FX.sharp);
+    afEl.classList.remove("seek");afEl.classList.add("lock");
+    if(ping)pingBox();
+  }
+  function refocus(k){
+    if(!FX.on||!FS.ready||RM||cur("af")==="MF")return;
+    origin();afEl.classList.remove("lock");afEl.classList.add("seek");
+    hunt(FX.blur*k,FX.time*(.7+.3*k),true,function(){settle(true)});
+  }
+  function afChanged(){
+    if(!FX.on||!FS.ready)return;
+    if(cur("af")==="MF"){tok++;FS.busy=false;FS.b=0;FS.sc=1;paintF();rampSharp(FX.sharp);afEl.classList.remove("seek");afEl.classList.add("lock");return}
+    refocus(.6);
+  }
+  function micro(){
+    FS.busy=true;
+    hunt(FX.blur*.22,.9,true,function(){FS.b=0;FS.sc=1;FS.busy=false;paintF();pingBox()});
+  }
+  function boot(){
+    if(!FX.on)return;
+    hero.classList.add("fx-on");
+    if(FX.sharp>0)setKernel(RM?FX.sharp:0);
+    if(RM){FS.k=FX.sharp;place(FS.u,FS.v);afEl.classList.add("lock");FS.ready=true;paintF();return}
+    var u=FS.u,v=FS.v,timeOK=false,mediaOK=false,go=false;
+    afEl.style.opacity="0";afEl.style.left="50%";afEl.style.top="50%";afEl.classList.add("seek");
+    FS.b=FX.blur;paintF();
+    function start(){
+      if(go||!timeOK||!mediaOK)return;go=true;
+      afEl.style.opacity="";place(u,v);FS.ready=true;
+      hunt(FX.blur,FX.time,false,function(){settle(true)});
+    }
+    setTimeout(function(){afEl.style.opacity=""},900);
+    setTimeout(function(){timeOK=true;start()},1350);
+    var im=media[0],vd=media[1],need=false;
+    function okM(){mediaOK=true;start()}
+    if(CONFIG.heroPhoto&&im&&!(im.complete&&im.naturalWidth)){need=true;im.addEventListener("load",okM)}
+    if(CONFIG.heroVideo&&vd){need=true;vd.addEventListener("playing",okM)}
+    if(need)setTimeout(okM,4200);else mediaOK=true;
+  }
+  boot();
+  // click or tap the picture: the focus point moves there and the camera focuses again
+  if(FX.on&&FX.tap)hero.addEventListener("click",function(e){
+    if(!FS.ready||cur("af")==="MF"||e.defaultPrevented)return;
+    if(e.target.closest("a,button,input,textarea,select,label,.cs,[data-go],[data-open],[role=button],[role=link]"))return;
+    if(window.getSelection&&String(window.getSelection()))return;
+    var tr=thirds.getBoundingClientRect();if(!tr.width)return;
+    place(clamp((e.clientX-tr.left)/tr.width,.05,.95),clamp((e.clientY-tr.top)/tr.height,.07,.93));
+    refocus(.75);
+  });
+  window.addEventListener("resize",function(){if(FX.on)origin()});
+  // coming back to the home page (or scrolling back up) the camera quietly focuses once more
+  if(FX.on&&"IntersectionObserver" in window)new IntersectionObserver(function(en){
+    var v=en[0].isIntersecting;
+    if(v&&!vis&&performance.now()-hidAt>900)refocus(.5);
+    if(!v)hidAt=performance.now();
+    vis=v;
+  },{threshold:.2}).observe(hero);
+  // AF-C keeps tracking: now and then a very small refocus
+  (function idle(){
+    setTimeout(function(){
+      if(FX.on&&FX.idle&&!RM&&FS.ready&&!FS.busy&&vis&&!document.hidden&&currentView==="home"&&cur("af")==="AF-C"&&!row.matches(":hover"))micro();
+      idle();
+    },7000+Math.random()*5000);
+  })();
 })();
 
 
